@@ -17,7 +17,7 @@ Vagrant.configure("2") do |config|
         application_root: "/srv/www/pxlp_drupal_box/application",
         timezone: 'Europe/Stockholm',
         locale: 'en_US.UTF-8',
-        hostname: 'pxlp-drupal-box.dev www.pxlp-drupal-box.dev',
+        hostname: 'pxlp-drupal.dev www.pxlp-drupal.dev',
         nginx_tar_filename: 'nginx-1.6.3.tar.gz',
         nginx_unarchived_tar_filename: 'nginx-1.6.3',
         nginx_url_to_tar: 'http://nginx.org/download/nginx-1.6.3.tar.gz',
@@ -42,10 +42,10 @@ Vagrant.configure("2") do |config|
     }
 
     config.vm.provider :virtualbox do |v|
-        v.name = "www.pxlp-drupal-box.dev"
+        v.name = "www.pxlp-drupal.dev"
         v.customize [
             "modifyvm", :id,
-            "--name", "pxlp-drupal-box.dev",
+            "--name", "pxlp-drupal.dev",
             "--memory", 2048,
             "--cpus", 2,
         ]
