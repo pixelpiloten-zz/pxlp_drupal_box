@@ -1,0 +1,83 @@
+---
+- name: Nginx - Compiling - Installing tools - Unzip
+  apt: name=unzip state=present
+
+- name: Nginx - Compiling - Installing tools - build-essential
+  apt: name=build-essential state=present
+
+- name: Nginx - Compiling - Installing tools - zlib1g-dev
+  apt: name=zlib1g-dev state=present
+
+- name: Nginx - Compiling - Installing tools - libpcre3
+  apt: name=libpcre3 state=present
+
+- name: Nginx - Compiling - Installing tools - libpcre3-dev
+  apt: name=libpcre3-dev state=present
+
+- name: Nginx - Compiling - Installing tools - libssl-dev
+  apt: name=libssl-dev state=present
+
+- name: Nginx - Compiling - Creating log-directory for nginx.
+  file: path={{ path_nginx_log_dir }} owner=root group=root mode="0700" state=directory
+
+- name: Nginx - Compiling - Checking if nginx have been dowloaded before.
+  stat: path={{ path_home }}/{{ nginx_tar_filename }}
+  register: nginx_downloaded_status
+
+- name: Nginx - Compiling - Downloading nginx.
+  get_url: url={{ nginx_url_to_tar }} dest={{ path_home }}
+  when: not nginx_downloaded_status.stat.exists
+
+- name: Nginx - Compiling - Extracting downloaded nginx tar-file.
+  unarchive: src={{ path_home }}/{{ nginx_tar_filename }} dest={{ path_home }} copy=no
+  when: not nginx_downloaded_status.stat.exists
+
+- name: Nginx - Compiling - Checking if nginx have been dowloaded before.
+  stat: path={{ path_home }}/{{ ngx_pagespeed_zip_filename }}
+  register: ngx_pagespeed_downloaded_status
+
+- name: Nginx - Compiling - Downloading ngx_pagespeed
+  get_url: url={{ ngx_pagespeed_url_to_zip }} dest={{ path_home }}
+  when: not ngx_pagespeed_downloaded_status.stat.exists
+
+- name: Nginx - Compiling - Extracting downloaded ngx_pagespeed zip-file.
+  unarchive: src={{ path_home }}/{{ ngx_pagespeed_zip_filename }} dest={{ path_home }} copy=no
+  when: not ngx_pagespeed_downloaded_status.stat.exists
+
+- name: Nginx - Compiling - Checking if ngx_pagespeed psol has been downloaded before.
+  stat: path={{ path_home }}/{{ ngx_pagespeed_psol_tar_filename }}
+  register: ngx_pagespeed_psol_downloaded_status
+
+- name: Nginx - Compiling - Downloading ngx_pagespeed psol
+  get_url: url={{ ngx_pagespeed_psol_url_to_tar }} dest={{ path_home }} validate_certs=no
+  when: not ngx_pagespeed_psol_downloaded_status.stat.exists
+
+- name: Nginx - Compiling - Extracting downloaded ngx_pagespeed psol tar-file.
+  unarchive: src={{ path_home }}/{{ ngx_pagespeed_psol_tar_filename }} dest={{ path_home }}/{{ ngx_pagespeed_unarchived_zip_filename }} copy=no
+  when: not ngx_pagespeed_psol_downloaded_status.stat.exists
+
+- name: Nginx - Compiling - Checking if nginx has been compiled before.
+  stat: path={{ path_nginx_executable }}
+  register: nginx_executable_status
+
+- name: Nginx - Creating user group for nginx.
+  group: name=nginx state=present
+
+- name: Nginx - Creating user for nginx.
+  user: name=nginx group=nginx
+
+- name: Nginx - Compiling - Compiling nginx.
+  shell: 'cd {{ path_home }}/{{ nginx_unarchived_tar_filename }}; {{ item }}'
+  with_items:
+    - ./configure --add-module={{ path_home }}/{{ ngx_pagespeed_unarchived_zip_filename }} --with-http_gzip_static_module --with-http_ssl_module --user=nginx --group=nginx
+    - make
+    - make install
+
+- name: Nginx - Compiling - Adding nginx service-bash-script.
+  template: src=nginx-service.j2 dest={{ path_nginx_start_script }} owner=root group=root mode="0755"
+
+- name: Nginx - Compiling - Preparing for copying mime-types-file.
+  file: path=/etc/nginx state=directory
+
+- name: Nginx - Compiling - Copying mime-types-file.
+  template: src=mime-types.j2 dest={{ path_nginx_mime_types_file }} owner=root group=root mode="0755"

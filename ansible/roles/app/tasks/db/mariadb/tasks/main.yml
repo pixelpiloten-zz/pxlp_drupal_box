@@ -1,0 +1,31 @@
+---
+- name: MariaDB - Installing dependency python-mysqldb
+  apt: name=python-mysqldb state=present
+
+- name: MariaDB - Adding apt key.
+  apt_key: keyserver=hkp://keyserver.ubuntu.com:80 id=0xcbcb082a1bb943db
+
+- name: MariaDB - Adding apt repository.
+  apt_repository: repo='deb http://ftp.ddg.lth.se/mariadb/repo/10.0/ubuntu/ trusty main' state=present update_cache=yes
+
+- name: MariaDB - Install MariaDB server package.
+  apt: name=mariadb-server state=present
+
+- name: MariaDB - Start Mysql service
+  service: name=mysql state=restarted enabled=true
+
+- name: MariaDB - Setting mysql root password
+  mysql_user: check_implicit_admin=True login_user={{ mariadb_root_user }} login_password={{ mariadb_root_password }} name={{ mariadb_root_user }} password={{ mariadb_root_password }} state=present
+  with_items:
+     - 127.0.0.1
+     - ::1
+     - localhost
+
+- name: MariaDB - Configure
+  template: src=my-conf.j2 dest=/etc/mysql/my.cnf owner=root group=root
+
+- name: MariaDB - Reload the Mysql configuration
+  service: name=mysql state=reloaded
+
+- name: MariaDB - Creating database for Drupal
+  mysql_db: login_user={{ mariadb_root_user }} login_password={{ mariadb_root_password }} name={{ mariadb_drupal_database }} state=present

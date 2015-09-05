@@ -1,0 +1,30 @@
+---
+- name: Installing PHP-FPM
+  apt: name=php5-fpm state=present
+
+- name: Configuring PHP-FPM
+  template: src=php-fpm-conf.j2 dest={{ path_php_fpm_conf_file }} owner=root group=root
+
+- name: Configuring PHP
+  template: src=php-ini.j2 dest={{ path_php_ini_file }} owner=root group=root
+
+- name: Installing PHP-CLI
+  apt: name=php5-cli state=present
+
+- name: Installing PHP-PEAR
+  apt: name=php-pear state=present
+
+- name: Installing PHP-GD
+  apt: name=php5-gd state=present
+
+- name: Installing PHP-COMMON
+  apt: name=php5-common state=present
+
+- name: Installing PHP-CURL
+  apt: name=php5-curl state=present
+
+- name: Installing PHP-MYSQL
+  apt: name=php5-mysql state=present
+
+- name: Restarting PHP-FPM
+  service: name=php5-fpm state=restarted

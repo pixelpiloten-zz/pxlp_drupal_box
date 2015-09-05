@@ -1,0 +1,15 @@
+---
+- name: Creating folder for web-application
+  file: path={{ application_root }} state=directory
+
+- name: Configuring nginx
+  template: src=nginx-conf.j2 dest={{ path_nginx_conf_file }} owner=root group=root
+
+- name: Creating nginx vhosts-directory if it not exists already.
+  file: path={{ path_nginx_vhosts_dir }} state=directory
+
+- name: Configuring nginx default site
+  template: src=vhost-default.j2 dest={{ path_nginx_default_vhost_file }} owner=root group=root
+
+- name: (Re)Starting nginx
+  service: name=nginx state=restarted

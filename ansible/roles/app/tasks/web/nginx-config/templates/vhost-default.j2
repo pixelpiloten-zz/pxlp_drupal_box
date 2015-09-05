@@ -1,0 +1,110 @@
+# Main configuration
+server {
+        listen *:80;
+        # Change to the domain(s) you want this vhost to respond to.
+        server_name {{ hostname }};
+
+        # Root-folder for website.
+        root {{ application_root }};
+
+        # Max upload size
+        client_max_body_size 100M;
+
+        # ngx_pagespeed configuration
+        pagespeed RewriteLevel PassThrough;
+        pagespeed EnableFilters prioritize_critical_css;
+        pagespeed EnableFilters rewrite_images;
+        pagespeed EnableFilters rewrite_css;
+        pagespeed EnableFilters recompress_png;
+        pagespeed EnableFilters rewrite_javascript;
+        pagespeed EnableFilters resize_mobile_images;
+        pagespeed EnableFilters insert_image_dimensions;
+        pagespeed EnableFilters extend_cache;
+        pagespeed EnableFilters defer_javascript;
+        pagespeed EnableFilters convert_to_webp_lossless;
+        pagespeed EnableFilters remove_comments;
+        pagespeed EnableFilters collapse_whitespace;
+        pagespeed EnableFilters lazyload_images;
+        pagespeed EnableFilters local_storage_cache;
+
+        pagespeed LoadFromFile "${scheme}://www.${host}/sites/" "${document_root}/sites/";
+        pagespeed LoadFromFile "${scheme}://www.${host}/misc/" "${document_root}/misc/";
+        pagespeed LoadFromFile "${scheme}://www.${host}/themes/" "${document_root}/themes/";
+        pagespeed LoadFromFile "${scheme}://www.${host}/css/" "${document_root}/css/";
+
+        # Uncomment this if requests without the subdomain www should redirect to the subdomain www
+        if ( $host ~* ^(?!www\.) ) {
+            rewrite .* $scheme://www.$host$request_uri permanent;
+        }
+
+        location = /favicon.ico {
+                log_not_found off;
+                access_log off;
+        }
+
+        location = /robots.txt {
+                allow all;
+                log_not_found off;
+                access_log off;
+        }
+
+        # Blocks access to txt- and logfiles
+        location ~* \.(txt|log)$ {
+                allow 192.168.0.0/16;
+                deny all;
+        }
+
+        location ~ \..*/.*\.php$ {
+                return 403;
+        }
+
+        # Drupal specific - Blocks direct access to private files
+        #location ~ ^/sites/.*/private/ {
+        #        return 403;
+        #}
+
+        # Blocks access to hidden files.
+        location ~ (^|/)\. {
+                return 403;
+        }
+
+        ### advagg_css and advagg_js support
+        location ~* files/advagg_(?:css|js)/ {
+          gzip_static on;
+          access_log  off;
+          expires    max;
+          add_header  ETag "";
+          add_header  Cache-Control "max-age=31449600, no-transform, public";
+          try_files  $uri @rewrite;
+        }
+
+        location / {
+                # This is cool because no php is touched for static content
+                try_files $uri @rewrite;
+        }
+
+        # Handles clean-urls
+        location @rewrite {
+                rewrite ^ /index.php;
+        }
+
+        location ~ \.php$ {
+                fastcgi_split_path_info ^(.+\.php)(/.+)$;
+                include fastcgi_params;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                fastcgi_intercept_errors on;
+                fastcgi_pass 127.0.0.1:9000;
+        }
+
+        # Drupal specific - Rewrite for image styles
+        location ~ ^/sites/.*/files/styles/ {
+                expires max;
+                access_log  off;
+                try_files $uri @rewrite;
+        }
+
+        location ~* \.(js|css|ico|woff|ttf|svg|otf)$ {
+                expires max;
+                log_not_found off;
+        }
+}

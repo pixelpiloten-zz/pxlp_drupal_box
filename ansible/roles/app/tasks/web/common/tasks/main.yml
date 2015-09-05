@@ -1,0 +1,6 @@
+---
+- name: HTOP - Installing htop
+  apt: name=htop state=present
+
+- name: UNZIP - Installing unzip
+  apt: name=unzip state=present

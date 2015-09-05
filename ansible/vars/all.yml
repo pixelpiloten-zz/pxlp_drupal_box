@@ -1,0 +1,17 @@
+---
+server:
+    install: '1'
+    timezone: Europe/Stockholm
+    locale: en_US.UTF-8
+vagrant_local:
+    install: '1'
+    vm: {
+        base_box: trusty64,
+        hostname: talyn,
+        ip: 10.0.2.15,
+        memory: '2048',
+        sharedfolder: /home/pixelpiloten/Development/Talyn/application,
+        useVagrantCloud: '0',
+        syncType: rsync
+    }
+

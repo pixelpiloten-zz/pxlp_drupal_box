@@ -1,0 +1,10 @@
+---
+# application tasks to be customized and to run after the main provision
+# Web
+ - include: web/common/tasks/main.yml
+ - include: web/nginx-compile/tasks/main.yml
+ - include: web/nginx-config/tasks/main.yml
+ - include: web/php/tasks/main.yml
+ - include: web/drush/tasks/main.yml
+ # DB
+ - include: db/mariadb/tasks/main.yml

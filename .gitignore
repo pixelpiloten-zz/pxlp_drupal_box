@@ -1,0 +1,6 @@
+.idea
+.vagrant
+/application/*
+!/application/profiles
+!/application/profiles/pxlp_drupal
+!/application/profiles/pxlp_drupal/*
