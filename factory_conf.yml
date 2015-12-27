@@ -1,0 +1,5 @@
+servers:
+  stage:
+    git_branch: stage
+  production:
+    git_branch: master
