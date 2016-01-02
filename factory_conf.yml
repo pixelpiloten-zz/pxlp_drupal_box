@@ -3,3 +3,7 @@ servers:
     git_branch: stage
   production:
     git_branch: master
+    username: vagrant
+    host: 192.168.88.88
+    port: 22
+    deploy_path: /srv/www
